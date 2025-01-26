@@ -28,7 +28,8 @@ max_pages = 3
 
 # tag_2_search = 'doctor_(arknights)'
 # tag_2_search = 'skadi_the_corrupting_heart_(arknights)'
-tag_2_search = 'silverash_(arknights)'
+# tag_2_search = 'silverash_(arknights)'
+tag_2_search = 'originium_slug_(arknights)'
 
 tag_related = client.tag_related(tag_2_search)
 tag_related_len = len(tag_related.get('related_tags'))
