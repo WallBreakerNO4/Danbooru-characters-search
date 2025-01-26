@@ -175,3 +175,4 @@ cython_debug/
 danbooru_client.py
 outputs/*.csv
 outputs/*.txt
+count_releted_frequency.py
