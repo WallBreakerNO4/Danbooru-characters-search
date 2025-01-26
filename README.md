@@ -48,7 +48,7 @@ git clone https://github.com/danbooru/pybooru.git
 python pybooru_search.py
 
 # 自定义游戏名称和页数
-python pybooru_search.py --game genshin --pages 5
+python pybooru_search.py --game genshin_impact --pages 5
 
 # 显示无投稿的标签
 python pybooru_search.py --game arknights --show-empty
