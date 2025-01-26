@@ -2,6 +2,7 @@ from danbooru_client import create_danbooru_client
 import sys
 from tqdm import tqdm
 import os
+import csv
 
 # 创建Danbooru客户端
 client = create_danbooru_client()
@@ -42,9 +43,9 @@ def save_game_characters_to_file(game_name, max_pages=3, hide_empty=True):
                 pbar.update(1)
 
         # 创建男性和女性角色的文件名（添加outputs路径）
-        male_filename = os.path.join(output_dir, f"{game_name}_male_characters.txt")
-        female_filename = os.path.join(output_dir, f"{game_name}_female_characters.txt")
-        unknown_filename = os.path.join(output_dir, f"{game_name}_unknown_gender_characters.txt")
+        male_filename = os.path.join(output_dir, f"{game_name}_male_characters.csv")
+        female_filename = os.path.join(output_dir, f"{game_name}_female_characters.csv")
+        unknown_filename = os.path.join(output_dir, f"{game_name}_unknown_gender_characters.csv")
         
         male_count = 0
         female_count = 0
@@ -54,16 +55,28 @@ def save_game_characters_to_file(game_name, max_pages=3, hide_empty=True):
         male_gender_keywords = ['male', 'boy']
         female_gender_keywords = ['female', 'girl']
         
-        # 打开三个文件用于写入
-        with open(male_filename, 'w', encoding='utf-8') as male_file, \
-             open(female_filename, 'w', encoding='utf-8') as female_file, \
-             open(unknown_filename, 'w', encoding='utf-8') as unknown_file:
+        # 打开三个CSV文件用于写入
+        with open(male_filename, 'w', encoding='utf-8', newline='') as male_file, \
+             open(female_filename, 'w', encoding='utf-8', newline='') as female_file, \
+             open(unknown_filename, 'w', encoding='utf-8', newline='') as unknown_file:
+            
+            # 创建CSV写入器
+            male_writer = csv.writer(male_file)
+            female_writer = csv.writer(female_file)
+            unknown_writer = csv.writer(unknown_file)
+            
+            # 写入CSV头部
+            headers = ['name', 'male_frequency_avg', 'female_frequency_avg', 'post_count']
+            male_writer.writerow(headers)
+            female_writer.writerow(headers)
+            unknown_writer.writerow(headers)
             
             filtered_characters = [tag for tag in all_character_tags if game_name.lower() in tag.get('name', '').lower()]
             print("\n正在分析角色性别...")
             
             for tag in tqdm(filtered_characters, desc="分析角色性别"):
                 name = tag.get('name', '')
+                post_count = tag.get('post_count', 0)
                 try:
                     # 获取角色的相关标签
                     tag_related = client.tag_related(name)
@@ -97,20 +110,23 @@ def save_game_characters_to_file(game_name, max_pages=3, hide_empty=True):
                     male_releted_tags_frequency_avg = male_releted_tags_frequency_sum / male_releted_tags_count if male_releted_tags_count > 0 else 0
                     female_releted_tags_frequency_avg = female_releted_tags_frequency_sum / female_releted_tags_count if female_releted_tags_count > 0 else 0
                     
-                    # 根据频率判断性别
+                    # 准备CSV行数据
+                    row_data = [name, male_releted_tags_frequency_avg, female_releted_tags_frequency_avg, post_count]
+                    
+                    # 根据频率判断性别并写入相应的CSV文件
                     if male_releted_tags_frequency_avg > female_releted_tags_frequency_avg:
-                        male_file.write(f"{name}\n")
+                        male_writer.writerow(row_data)
                         male_count += 1
                     elif female_releted_tags_frequency_avg > male_releted_tags_frequency_avg:
-                        female_file.write(f"{name}\n")
+                        female_writer.writerow(row_data)
                         female_count += 1
                     else:
-                        unknown_file.write(f"{name}\n")
+                        unknown_writer.writerow(row_data)
                         unknown_count += 1
                         
                 except Exception as e:
                     print(f"\n获取角色 {name} 的相关tag时出错: {e}")
-                    unknown_file.write(f"{name}\n")
+                    unknown_writer.writerow([name, 0, 0, post_count])
                     unknown_count += 1
         
         print(f"\n角色tag保存完成:")
@@ -123,7 +139,5 @@ def save_game_characters_to_file(game_name, max_pages=3, hide_empty=True):
         print(f"保存角色tag时出错: {e}")
 
 if __name__ == "__main__":
-    # 搜索明日方舟的角色
-    # search_game_characters("arknights")
     # 保存明日方舟角色到文件，按性别分类
     save_game_characters_to_file("arknights")
