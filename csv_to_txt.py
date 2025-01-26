@@ -1,6 +1,14 @@
 import os
 import csv
 import argparse
+import re
+
+def convert_name(name):
+    # 将下划线转换为空格
+    name = name.replace('_', ' ')
+    # 在括号前添加转义字符
+    name = re.sub(r'([()])', r'\\\1', name)
+    return name
 
 def convert_csv_to_txt(min_post_count):
     # 获取outputs文件夹中的所有csv文件
@@ -28,7 +36,8 @@ def convert_csv_to_txt(min_post_count):
                         if row['name'] and row['post_count']:  # 确保name和post_count不为空
                             post_count = int(row['post_count'])
                             if post_count >= min_post_count:
-                                txtfile.write(f"{row['name']}\n")
+                                converted_name = convert_name(row['name'])
+                                txtfile.write(f"{converted_name}\n")
                                 filtered_count += 1
                     
                     print(f"已将 {csv_file} 转换为 {txt_file}")
