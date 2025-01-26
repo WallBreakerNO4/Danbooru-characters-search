@@ -1,0 +1,16 @@
+from pybooru import Danbooru
+import sys
+
+def create_danbooru_client(username='Your_Username', api_key='Your_API_Key'):
+    """
+    创建Danbooru客户端
+    :param username: Danbooru用户名
+    :param api_key: Danbooru API密钥
+    :return: Danbooru客户端实例
+    """
+    try:
+        client = Danbooru('danbooru', username=username, api_key=api_key)
+        return client
+    except Exception as e:
+        print(f"连接Danbooru时出错: {e}")
+        sys.exit(1) 
