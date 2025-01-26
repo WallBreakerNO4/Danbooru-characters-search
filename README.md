@@ -55,6 +55,11 @@ save_game_characters_to_file("arknights", max_pages=3, hide_empty=True)
    - `[game_name]_female_characters.csv`：女性角色数据
    - `[game_name]_unknown_gender_characters.csv`：未知性别角色数据
 
+3. 转换为[sd-dynamic-prompts](https://github.com/adieyal/sd-dynamic-prompts)兼容格式的txt文件
+```bash
+python csv_to_txt.py [minimal_post_count] # 小于这个数的角色会被过滤
+```
+
 ## 注意事项
 
 - 需要有效的Danbooru账号才能使用API
