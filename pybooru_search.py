@@ -1,6 +1,7 @@
 from danbooru_client import create_danbooru_client
 import sys
 from tqdm import tqdm
+import os
 
 # 创建Danbooru客户端
 client = create_danbooru_client()
@@ -129,6 +130,10 @@ def save_game_characters_to_file(game_name, max_pages=3, hide_empty=True):
     :param hide_empty: 是否隐藏没有投稿的tag
     """
     try:
+        # 创建outputs文件夹（如果不存在）
+        output_dir = "outputs"
+        os.makedirs(output_dir, exist_ok=True)
+        
         page = 1
         limit = 1000  # 每页最大记录数
         all_character_tags = []
@@ -152,10 +157,10 @@ def save_game_characters_to_file(game_name, max_pages=3, hide_empty=True):
                 page += 1
                 pbar.update(1)
 
-        # 创建男性和女性角色的文件名
-        male_filename = f"{game_name}_male_characters.txt"
-        female_filename = f"{game_name}_female_characters.txt"
-        unknown_filename = f"{game_name}_unknown_gender_characters.txt"
+        # 创建男性和女性角色的文件名（添加outputs路径）
+        male_filename = os.path.join(output_dir, f"{game_name}_male_characters.txt")
+        female_filename = os.path.join(output_dir, f"{game_name}_female_characters.txt")
+        unknown_filename = os.path.join(output_dir, f"{game_name}_unknown_gender_characters.txt")
         
         male_count = 0
         female_count = 0
