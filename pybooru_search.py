@@ -3,6 +3,7 @@ import sys
 from tqdm import tqdm
 import os
 import csv
+import argparse
 
 # 创建Danbooru客户端
 client = create_danbooru_client()
@@ -139,5 +140,11 @@ def save_game_characters_to_file(game_name, max_pages=3, hide_empty=True):
         print(f"保存角色tag时出错: {e}")
 
 if __name__ == "__main__":
-    # 保存明日方舟角色到文件，按性别分类
-    save_game_characters_to_file("arknights")
+    parser = argparse.ArgumentParser(description='从Danbooru获取游戏角色标签并按性别分类')
+    parser.add_argument('--game', type=str, default='arknights', help='游戏名称，默认为arknights')
+    parser.add_argument('--pages', type=int, default=3, help='最大搜索页数，默认为3页')
+    parser.add_argument('--show-empty', action='store_false', help='显示无投稿的标签（默认隐藏）')
+    args = parser.parse_args()
+    
+    # 保存游戏角色到文件，按性别分类
+    save_game_characters_to_file(args.game, max_pages=args.pages, hide_empty=args.show_empty)
