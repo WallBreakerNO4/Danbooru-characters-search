@@ -1,0 +1,2 @@
+Pybooru==5.0.0.dev1
+tqdm
