@@ -1,6 +1,5 @@
 import os
 import csv
-import argparse
 import re
 
 def convert_name(name):
@@ -13,6 +12,14 @@ def convert_name(name):
 def convert_csv_to_txt(min_post_count):
     # 获取outputs文件夹中的所有csv文件
     csv_files = [f for f in os.listdir('outputs') if f.endswith('.csv')]
+    
+    if not csv_files:
+        print("错误：在outputs文件夹中没有找到CSV文件")
+        return
+    
+    print(f"\n找到以下CSV文件：")
+    for i, file in enumerate(csv_files, 1):
+        print(f"{i}. {file}")
     
     for csv_file in csv_files:
         # 读取CSV文件
@@ -40,14 +47,36 @@ def convert_csv_to_txt(min_post_count):
                                 txtfile.write(f"{converted_name}\n")
                                 filtered_count += 1
                     
-                    print(f"已将 {csv_file} 转换为 {txt_file}")
+                    print(f"\n已将 {csv_file} 转换为 {txt_file}")
                     print(f"总计 {total_count} 个角色，筛选后保留 {filtered_count} 个角色")
         except Exception as e:
             print(f"处理 {csv_file} 时出错: {str(e)}")
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='将CSV文件转换为TXT文件，并根据post_count筛选角色')
-    parser.add_argument('min_post_count', type=int, help='最小post数量，小于该数量的角色将被剔除')
-    args = parser.parse_args()
+def interactive_cli():
+    print("欢迎使用CSV转TXT工具")
+    print("本工具将把outputs文件夹中的CSV文件转换为TXT文件，并根据post数量筛选角色")
     
-    convert_csv_to_txt(args.min_post_count) 
+    try:
+        min_count = input("\n请输入最小post数量（输入q退出，默认为30）: ").strip()
+        
+        if min_count.lower() == 'q':
+            print("退出程序")
+            return
+        
+        min_count = int(min_count) if min_count else 30
+        
+        if min_count < 0:
+            print("错误：最小post数量不能小于0")
+            return
+            
+        print(f"\n开始转换，最小post数量设置为: {min_count}")
+        convert_csv_to_txt(min_count)
+        print("\n程序执行完毕")
+            
+    except ValueError:
+        print("错误：请输入有效的数字")
+    except Exception as e:
+        print(f"发生错误: {e}")
+
+if __name__ == "__main__":
+    interactive_cli() 
