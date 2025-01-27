@@ -24,8 +24,8 @@
 1. 克隆本仓库：
 
 ```bash
-git clone [repository-url]
-cd pybooru.pip
+git clone https://github.com/WallBreakerNO4/Danbooru-characters-search.git
+cd Danbooru-characters-search
 ```
 
 2. 安装依赖：
@@ -34,23 +34,32 @@ cd pybooru.pip
 pip install -r requirement.txt
 ```
 
-3. 配置 Danbooru 客户端：
+3. 安装 Pybooru:
+```bash
+git clone https://github.com/LuqueDaniel/pybooru.git
+```
+> pypi 上的库太老了，需要手动安装
+
+
+4. 配置 Danbooru 客户端：
     - 复制 `danbooru_client.py.example` 为 `danbooru_client.py`
     - 在 `danbooru_client.py` 中填入你的 Danbooru API 凭证
 
 ## 使用方法
 
-1. 运行主程序：
+### 1. 获取角色数据
+
+运行主程序：
 
 ```bash
 python pybooru_search.py
 ```
 
-2. 按照交互式提示操作：
-    - 输入游戏名称或部分名称（默认为 'arknights'）
-    - 从搜索结果中选择具体的游戏
-    - 设置最大搜索页数（默认为 3）
-    - 选择是否显示无投稿的标签
+按照交互式提示操作：
+- 输入游戏名称或部分名称（默认为 'arknights'）
+- 从搜索结果中选择具体的游戏
+- 设置最大搜索页数（默认为 3）
+- 选择是否显示无投稿的标签
 
 输出文件将保存在 `outputs` 目录下，包括：
 - `[game_name]_male_characters.csv`：男性角色数据
@@ -63,17 +72,30 @@ python pybooru_search.py
 - female_frequency_avg：女性相关标签的平均频率
 - post_count：投稿数量
 
-3. 转换为 [sd-dynamic-prompts](https://github.com/adieyal/sd-dynamic-prompts) 兼容格式的 txt 文件（可选）：
+### 2. 转换为 txt 格式
+
+运行转换程序：
 
 ```bash
-python csv_to_txt.py [minimal_post_count] # 小于这个数的角色会被过滤
+python csv_to_txt.py
 ```
+
+按照交互式提示操作：
+- 输入最小 post 数量（默认为 30）
+- 程序会自动处理 outputs 目录下的所有 CSV 文件
+- 生成的 txt 文件与原 CSV 文件同名，但扩展名改为 .txt
+- 转换完成后程序自动退出
+
+生成的 txt 文件格式兼容 [sd-dynamic-prompts](https://github.com/adieyal/sd-dynamic-prompts)，可直接用于提示词生成。
 
 ## 注意事项
 
 - 需要有效的 Danbooru 账号才能使用 API
 - Danbooru 本身的数据库并没有直接标出角色性别，本工具是基于相关标签的统计进行判断，可能存在误差
-- 
+
+## TODO
+
+- 添加更多分类方法（如过滤和 swim 相关的角色），而不是单纯的按性别分类
 
 ## 许可证
 
