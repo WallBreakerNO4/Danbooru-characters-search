@@ -139,12 +139,34 @@ def save_game_characters_to_file(game_name, max_pages=3, hide_empty=True):
     except Exception as e:
         print(f"保存角色tag时出错: {e}")
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='从Danbooru获取游戏角色标签并按性别分类')
-    parser.add_argument('--game', type=str, default='arknights', help='游戏名称，默认为arknights')
-    parser.add_argument('--pages', type=int, default=3, help='最大搜索页数，默认为3页')
-    parser.add_argument('--show-empty', action='store_false', help='显示无投稿的标签（默认隐藏）')
-    args = parser.parse_args()
+def interactive_cli():
+    print("欢迎使用Pybooru角色搜索工具")
+    print("输入游戏名称开始搜索，输入'q'退出")
     
-    # 保存游戏角色到文件，按性别分类
-    save_game_characters_to_file(args.game, max_pages=args.pages, hide_empty=args.show_empty)
+    while True:
+        game_name = input("\n请输入游戏名称（默认arknights）: ").strip()
+        
+        if game_name.lower() == 'q':
+            print("退出程序")
+            break
+            
+        if not game_name:
+            game_name = "arknights"
+            
+        try:
+            pages = input("请输入最大搜索页数（默认3）: ").strip()
+            pages = int(pages) if pages else 3
+            
+            show_empty = input("是否显示无投稿的标签？(y/n, 默认n): ").strip().lower()
+            hide_empty = show_empty != 'y'
+            
+            print(f"\n开始搜索游戏: {game_name}")
+            save_game_characters_to_file(game_name, max_pages=pages, hide_empty=hide_empty)
+            
+        except ValueError:
+            print("错误：请输入有效的数字")
+        except Exception as e:
+            print(f"发生错误: {e}")
+
+if __name__ == "__main__":
+    interactive_cli()
