@@ -154,15 +154,11 @@ def get_possible_game_names(search_term):
 
 def interactive_cli():
     print("欢迎使用Pybooru角色搜索工具")
-    print("输入游戏名称开始搜索，输入'q'退出")
+    print("输入游戏名称开始搜索，留空退出")
     
     while True:
-        search_term = input("\n请输入游戏名称或部分名称: ").strip()
+        search_term = input("\n请输入游戏名称或部分名称（默认为'arknights'）: ").strip()
         
-        if search_term.lower() == 'q':
-            print("退出程序")
-            break
-            
         if not search_term:
             search_term = "arknights"
             
@@ -181,9 +177,10 @@ def interactive_cli():
         # 让用户选择游戏
         while True:
             try:
-                choice = input("\n请输入序号选择游戏（或输入'q'退出）: ").strip()
-                if choice.lower() == 'q':
-                    break
+                choice = input("\n请输入序号选择游戏（留空退出）: ").strip()
+                if not choice:
+                    print("退出程序")
+                    return
                     
                 choice = int(choice)
                 if 1 <= choice <= len(possible_games):
@@ -195,10 +192,16 @@ def interactive_cli():
                 print("请输入有效的数字")
             
         try:
-            pages = input("请输入最大搜索页数（默认3）: ").strip()
+            pages = input("请输入最大搜索页数（输入q退出，默认3）: ").strip()
+            if pages.lower() == 'q':
+                print("退出程序")
+                return
             pages = int(pages) if pages else 3
             
-            show_empty = input("是否显示无投稿的标签？(y/n, 默认n): ").strip().lower()
+            show_empty = input("是否显示无投稿的标签？(y/n, 输入q退出，默认n): ").strip().lower()
+            if show_empty == 'q':
+                print("退出程序")
+                return
             hide_empty = show_empty != 'y'
             
             print(f"\n开始搜索游戏: {game_name}")
