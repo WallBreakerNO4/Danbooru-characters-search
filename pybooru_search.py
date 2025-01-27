@@ -1,9 +1,7 @@
 from danbooru_client import create_danbooru_client
-import sys
 from tqdm import tqdm
 import os
 import csv
-import argparse
 
 # 创建Danbooru客户端
 client = create_danbooru_client()
@@ -139,19 +137,62 @@ def save_game_characters_to_file(game_name, max_pages=3, hide_empty=True):
     except Exception as e:
         print(f"保存角色tag时出错: {e}")
 
+def get_possible_game_names(search_term):
+    """获取可能的游戏名列表"""
+    try:
+        games = client.tag_list(
+            name_matches=f"*{search_term}*",
+            category=3,  # 3表示游戏分类
+            order="count",
+            limit=10,
+            hide_empty=True
+        )
+        return [tag['name'] for tag in games]
+    except Exception as e:
+        print(f"获取游戏列表时出错: {e}")
+        return []
+
 def interactive_cli():
     print("欢迎使用Pybooru角色搜索工具")
     print("输入游戏名称开始搜索，输入'q'退出")
     
     while True:
-        game_name = input("\n请输入游戏名称（默认arknights）: ").strip()
+        search_term = input("\n请输入游戏名称或部分名称: ").strip()
         
-        if game_name.lower() == 'q':
+        if search_term.lower() == 'q':
             print("退出程序")
             break
             
-        if not game_name:
-            game_name = "arknights"
+        if not search_term:
+            search_term = "arknights"
+            
+        # 获取可能的游戏名列表
+        possible_games = get_possible_game_names(search_term)
+        
+        if not possible_games:
+            print(f"未找到与'{search_term}'相关的游戏")
+            continue
+            
+        # 显示可选游戏列表
+        print("\n找到以下游戏：")
+        for i, game in enumerate(possible_games, 1):
+            print(f"{i}. {game}")
+            
+        # 让用户选择游戏
+        while True:
+            try:
+                choice = input("\n请输入序号选择游戏（或输入'q'退出）: ").strip()
+                if choice.lower() == 'q':
+                    break
+                    
+                choice = int(choice)
+                if 1 <= choice <= len(possible_games):
+                    game_name = possible_games[choice - 1]
+                    break
+                else:
+                    print("请输入有效的序号")
+            except ValueError:
+                print("请输入有效的数字")
             
         try:
             pages = input("请输入最大搜索页数（默认3）: ").strip()
