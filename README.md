@@ -88,6 +88,10 @@ python csv_to_txt.py [minimal_post_count] # 小于这个数的角色会被过滤
 -   需要有效的 Danbooru 账号才能使用 API
 -   Danbooru 本身的数据库并没有直接标出角色性别，本工具是基于角色标签的统计，可能存在误差
 
+## TODO
+
+-   允许自定义分类/过滤方式
+
 ## 许可证
 
 MIT License
