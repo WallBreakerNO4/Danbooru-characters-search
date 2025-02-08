@@ -82,9 +82,9 @@ python csv_to_txt.py
 
 按照交互式提示操作：
 - 输入最小 post 数量（默认为 30）
+- 输入时间过滤 （默认为2024-10-15）
 - 程序会自动处理 outputs 目录下的所有 CSV 文件
-- 生成的 txt 文件与原 CSV 文件同名，但扩展名改为 .txt
-- 转换完成后程序自动退出
+- 生成的 txt 文件与原 CSV 文件同名
 
 生成的 txt 文件格式兼容 [sd-dynamic-prompts](https://github.com/adieyal/sd-dynamic-prompts)，可直接用于提示词生成。
 
@@ -92,6 +92,7 @@ python csv_to_txt.py
 
 - 需要有效的 Danbooru 账号才能使用 API
 - Danbooru 本身的数据库并没有直接标出角色性别，本工具是基于相关标签的统计进行判断，可能存在误差
+    > 如明日方舟的 `doctor \(arknights\)` 就会被误判为女性
 
 ## TODO
 
