@@ -34,6 +34,11 @@ def save_game_characters_to_file(game_name, max_pages=3, hide_empty=True):
                     hide_empty=hide_empty
                 )
                 
+                # # 打印第一个tag的内容以检查结构
+                # if character_tags and page == 1:
+                #     print("\nDebug - First tag content:")
+                #     print(character_tags[0])
+                
                 if not character_tags:
                     break
                     
@@ -65,7 +70,7 @@ def save_game_characters_to_file(game_name, max_pages=3, hide_empty=True):
             unknown_writer = csv.writer(unknown_file)
             
             # 写入CSV头部
-            headers = ['name', 'male_frequency_avg', 'female_frequency_avg', 'post_count']
+            headers = ['name', 'male_frequency_avg', 'female_frequency_avg', 'post_count', 'created_at', 'updated_at']
             male_writer.writerow(headers)
             female_writer.writerow(headers)
             unknown_writer.writerow(headers)
@@ -76,6 +81,9 @@ def save_game_characters_to_file(game_name, max_pages=3, hide_empty=True):
             for tag in tqdm(filtered_characters, desc="分析角色性别"):
                 name = tag.get('name', '')
                 post_count = tag.get('post_count', 0)
+                created_at = tag.get('created_at', '')
+                updated_at = tag.get('updated_at', '')
+                
                 try:
                     # 获取角色的相关标签
                     tag_related = client.tag_related(name)
@@ -89,28 +97,28 @@ def save_game_characters_to_file(game_name, max_pages=3, hide_empty=True):
                     # 先处理female标签
                     female_matched_tags = []
                     for keyword in female_gender_keywords:
-                        gender_tags = [tag for tag in tag_related.get('related_tags') 
-                                    if keyword in tag.get('tag')['name'].lower()]
+                        gender_tags = [tag for tag in tag_related.get('related_tags', []) 
+                                    if keyword in tag.get('tag', {}).get('name', '').lower()]
                         for tag in gender_tags:
                             female_releted_tags_count += 1
-                            female_releted_tags_frequency_sum += tag['frequency']
+                            female_releted_tags_frequency_sum += tag.get('frequency', 0)
                             female_matched_tags.append(tag)
                     
                     # 从所有标签中移除female标签，再处理male标签
-                    remaining_tags = [tag for tag in tag_related.get('related_tags') if tag not in female_matched_tags]
+                    remaining_tags = [tag for tag in tag_related.get('related_tags', []) if tag not in female_matched_tags]
                     for keyword in male_gender_keywords:
                         gender_tags = [tag for tag in remaining_tags 
-                                    if keyword in tag.get('tag')['name'].lower()]
+                                    if keyword in tag.get('tag', {}).get('name', '').lower()]
                         for tag in gender_tags:
                             male_releted_tags_count += 1
-                            male_releted_tags_frequency_sum += tag['frequency']
+                            male_releted_tags_frequency_sum += tag.get('frequency', 0)
                     
                     # 计算平均频率
                     male_releted_tags_frequency_avg = male_releted_tags_frequency_sum / male_releted_tags_count if male_releted_tags_count > 0 else 0
                     female_releted_tags_frequency_avg = female_releted_tags_frequency_sum / female_releted_tags_count if female_releted_tags_count > 0 else 0
                     
                     # 准备CSV行数据
-                    row_data = [name, male_releted_tags_frequency_avg, female_releted_tags_frequency_avg, post_count]
+                    row_data = [name, male_releted_tags_frequency_avg, female_releted_tags_frequency_avg, post_count, created_at, updated_at]
                     
                     # 根据频率判断性别并写入相应的CSV文件
                     if male_releted_tags_frequency_avg > female_releted_tags_frequency_avg:
@@ -125,7 +133,7 @@ def save_game_characters_to_file(game_name, max_pages=3, hide_empty=True):
                         
                 except Exception as e:
                     print(f"\n获取角色 {name} 的相关tag时出错: {e}")
-                    unknown_writer.writerow([name, 0, 0, post_count])
+                    unknown_writer.writerow([name, 0, 0, post_count, created_at, updated_at])
                     unknown_count += 1
         
         print(f"\n角色tag保存完成:")
