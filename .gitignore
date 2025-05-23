@@ -172,7 +172,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
-danbooru_client.py
+
+# danbooru_client.py
+config.py
 outputs/*.csv
 outputs/*.txt
 count_releted_frequency.py

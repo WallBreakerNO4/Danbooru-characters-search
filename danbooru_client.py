@@ -1,7 +1,8 @@
-from pybooru import Danbooru
+from pybooru.pybooru import Danbooru
 import sys
+from config import *
 
-def create_danbooru_client(username='Your_Username', api_key='Your_API_Key'):
+def create_danbooru_client(username=USERNAME, api_key=API_KEY):
     """
     创建Danbooru客户端
     :param username: Danbooru用户名
