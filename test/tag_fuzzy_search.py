@@ -11,7 +11,7 @@ def test_tag_fuzzy_search():
 
     # 测试模糊搜索标签
     tag_to_search = "*amiya*"
-    search_results = client.tag_list(tag_to_search, category=4, order="count", limit=10)
+    search_results = client.tag_list(tag_to_search, category=4, order="count",hide_empty=True)
     print(f"模糊搜索标签 '{tag_to_search}' 的结果:")
     for tag in search_results:
         print(f"Tag: {tag['name']} - Post Count: {tag['post_count']}")
