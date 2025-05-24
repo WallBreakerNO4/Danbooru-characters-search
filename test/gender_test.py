@@ -1,3 +1,8 @@
+import sys
+import os
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from libs.danbooru_client import create_danbooru_client
 
 client = create_danbooru_client()
