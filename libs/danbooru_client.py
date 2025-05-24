@@ -1,14 +1,14 @@
 import requests
 import sys
-from config import *
+from libs.config import *
 
 
 class DanbooruAPIClient:
     """
     Danbooru API 客户端，使用 requests 库直接与 API 交互
     """
-    
-    def __init__(self, username, api_key, base_url="https://danbooru.donmai.us"):
+
+    def __init__(self, username, api_key, base_url=BASE_URL):
         """
         初始化 Danbooru API 客户端
         :param username: Danbooru 用户名
@@ -19,7 +19,7 @@ class DanbooruAPIClient:
         self.api_key = api_key
         self.base_url = base_url
         self.session = requests.Session()
-        
+
     def _make_request(self, endpoint, params=None):
         """
         发送 HTTP 请求到 Danbooru API
@@ -28,19 +28,16 @@ class DanbooruAPIClient:
         :return: JSON 响应数据
         """
         url = f"{self.base_url}/{endpoint}"
-        
+
         # 清理空参数
         if params:
             params = {k: v for k, v in params.items() if v is not None}
-        
+
         try:
             response = self.session.get(
-                url,
-                params=params,
-                auth=(self.username, self.api_key),
-                timeout=30
+                url, params=params, auth=(self.username, self.api_key), timeout=30
             )
-            
+
             # 检查 HTTP 状态码
             if response.status_code == 200:
                 return response.json()
@@ -54,12 +51,19 @@ class DanbooruAPIClient:
                 raise Exception("请求频率过高：请稍后重试")
             else:
                 raise Exception(f"HTTP 错误 {response.status_code}: {response.text}")
-                
+
         except requests.exceptions.RequestException as e:
             raise Exception(f"网络请求失败: {e}")
-    
-    def tag_list(self, name_matches=None, category=None, order=None, 
-                 page=1, limit=1000, hide_empty=None):
+
+    def tag_list(
+        self,
+        name_matches=None,
+        category=None,
+        order=None,
+        page=1,
+        limit=1000,
+        hide_empty=None,
+    ):
         """
         获取标签列表
         :param name_matches: 标签名匹配模式
@@ -71,16 +75,16 @@ class DanbooruAPIClient:
         :return: 标签列表
         """
         params = {
-            'search[name_matches]': name_matches,
-            'search[category]': category,
-            'search[order]': order,
-            'page': str(page),
-            'limit': str(limit),
-            'search[hide_empty]': 'yes' if hide_empty else None
+            "search[name_matches]": name_matches,
+            "search[category]": category,
+            "search[order]": order,
+            "page": str(page),
+            "limit": str(limit),
+            "search[hide_empty]": "yes" if hide_empty else None,
         }
-        
-        return self._make_request('tags.json', params)
-    
+
+        return self._make_request("tags.json", params)
+
     def tag_related(self, query, category=None):
         """
         获取相关标签
@@ -88,12 +92,9 @@ class DanbooruAPIClient:
         :param category: 标签分类过滤
         :return: 相关标签数据
         """
-        params = {
-            'query': query,
-            'category': category
-        }
-        
-        return self._make_request('related_tag.json', params)
+        params = {"query": query, "category": category}
+
+        return self._make_request("related_tag.json", params)
 
 
 def create_danbooru_client(username=USERNAME, api_key=API_KEY):
