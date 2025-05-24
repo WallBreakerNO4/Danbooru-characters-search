@@ -1,6 +1,6 @@
 # Danbooru游戏角色标签分析工具
 
-这是一个基于 Pybooru 的 Python 工具，用于从 Danbooru 获取和分析特定游戏的角色标签数据。该工具可以自动获取角色信息并按性别进行分类，生成相应的数据文件。
+这是一个 Python 工具，用于从 Danbooru 获取和分析特定游戏的角色标签数据。该工具可以自动获取角色信息并按性别进行分类，生成相应的数据文件。
 
 ## 功能特性
 
@@ -12,12 +12,13 @@
 - 可选择是否隐藏无投稿的标签
 - 包含进度条显示搜索进度
 - 交互式命令行界面，方便操作
+- 使用自建的轻量级 Danbooru API 客户端，提供更好的错误处理和性能
 
 ## 环境要求
 
 - Python 3.6+
 - tqdm
-- Pybooru
+- requests
 
 ## 安装说明
 
@@ -31,19 +32,17 @@ cd Danbooru-characters-search
 2. 安装依赖：
 
 ```bash
-pip install -r requirement.txt
+pip install -r requirements.txt
 ```
 
-3. 安装 Pybooru:
-```bash
-git clone https://github.com/LuqueDaniel/pybooru.git
-```
-> pypi 上的库太老了，需要手动安装
-
-
-4. 配置 Danbooru 客户端：
-    - 复制 `danbooru_client.py.example` 为 `danbooru_client.py`
-    - 在 `danbooru_client.py` 中填入你的 Danbooru API 凭证
+3. 配置 Danbooru API key：
+    - 复制 [`libs/config.py.example`](libs/config.py.example:1) 为 [`libs/config.py`](libs/config.py:1)
+    - 在 [`libs/config.py`](libs/config.py:1) 中填入你的 Danbooru API 凭证（官方Danbooru的api key在 [用户资料页](https://danbooru.donmai.us/profile) 查看）：
+      ```python
+      USERNAME = "your_username"
+      API_KEY = "your_api_key"
+      BASE_URL = "https://danbooru.donmai.us"  # 或其他 Danbooru 实例
+      ```
 
 ## 使用方法
 
