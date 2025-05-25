@@ -4,6 +4,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from libs.danbooru_client import create_danbooru_client
+from libs.character_search import calculate_average_tag_frequency, calculate_gender_frequencies
 
 client = create_danbooru_client()
 
@@ -47,19 +48,12 @@ print(f"tag_related_len: {tag_related_len}")
 #     tag_info = tag.get('tag')
 #     print("Tag: {0} ----- {1}".format(tag_info['name'], tag_info['post_count']))
 
-# 过滤性别相关标签
-# gender_keywords = ['male', 'female', 'boy', 'girl']
+# 定义性别关键词
 male_gender_keywords = ["male", "boy"]
 female_gender_keywords = ["female", "girl"]
-male_releted_post_count = 0
-female_releted_post_count = 0
-male_releted_tags_count = 0
-female_releted_tags_count = 0
-male_releted_tags_frequency_sum = 0
-female_releted_tags_frequency_sum = 0
 
-# 先处理female标签
-female_matched_tags = []
+# 显示详细的标签匹配信息（保留原有的调试输出）
+print("\n详细标签匹配信息:")
 for keyword in female_gender_keywords:
     gender_tags = [
         tag
@@ -70,9 +64,16 @@ for keyword in female_gender_keywords:
         print(f"\n包含 '{keyword}' 的标签:")
         for tag in gender_tags:
             print(f"标签: {tag.get('tag').get('name')} - 频率: {tag['frequency']}")
-            female_releted_tags_count += 1
-            female_releted_tags_frequency_sum += tag["frequency"]
-            female_matched_tags.append(tag)
+
+# 先处理female标签以避免重复
+female_matched_tags = []
+for keyword in female_gender_keywords:
+    gender_tags = [
+        tag
+        for tag in tag_related.get("related_tags")
+        if keyword in tag.get("tag")["name"].lower()
+    ]
+    female_matched_tags.extend(gender_tags)
 
 # 从所有标签中移除female标签，再处理male标签
 remaining_tags = [
@@ -86,19 +87,9 @@ for keyword in male_gender_keywords:
         print(f"\n包含 '{keyword}' 的标签:")
         for tag in gender_tags:
             print(f"标签: {tag.get('tag').get('name')} - 频率: {tag['frequency']}")
-            male_releted_tags_count += 1
-            male_releted_tags_frequency_sum += tag["frequency"]
 
-male_releted_tags_frequency_avg = (
-    male_releted_tags_frequency_sum / male_releted_tags_count
-    if male_releted_tags_count > 0
-    else 0
-)
-female_releted_tags_frequency_avg = (
-    female_releted_tags_frequency_sum / female_releted_tags_count
-    if female_releted_tags_count > 0
-    else 0
-)
+# 使用新的函数计算性别频率
+male_releted_tags_frequency_avg, female_releted_tags_frequency_avg = calculate_gender_frequencies(tag_2_search)
 
 print(f"\n男性相关标签的相关频率: {male_releted_tags_frequency_avg}")
 print(f"女性相关标签的相关频率: {female_releted_tags_frequency_avg}")
