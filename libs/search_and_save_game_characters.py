@@ -4,7 +4,9 @@ import csv
 from libs.character_search import client, calculate_gender_frequencies
 
 
-def save_characters_to_files(analyzed_characters, game_name, output_dir):
+def save_characters_to_files(
+    analyzed_characters, character_dict, game_name, output_dir
+):
     """
     将分析好的角色数据保存到CSV文件
     :param analyzed_characters: 已分析的角色数据列表
@@ -14,13 +16,21 @@ def save_characters_to_files(analyzed_characters, game_name, output_dir):
     # 创建文件名
     male_filename = os.path.join(output_dir, f"{game_name}_male_characters.csv")
     female_filename = os.path.join(output_dir, f"{game_name}_female_characters.csv")
-    unknown_filename = os.path.join(output_dir, f"{game_name}_unknown_gender_characters.csv")
-    
+    unknown_filename = os.path.join(
+        output_dir, f"{game_name}_unknown_gender_characters.csv"
+    )
+
     # 按性别分组数据
-    male_characters = [c for c in analyzed_characters if c["gender"] == "male"]
-    female_characters = [c for c in analyzed_characters if c["gender"] == "female"]
-    unknown_characters = [c for c in analyzed_characters if c["gender"] == "unknown"]
-    
+    male_characters = [
+        c for c in analyzed_characters if character_dict[c]["gender"] == "male"
+    ]
+    female_characters = [
+        c for c in analyzed_characters if character_dict[c]["gender"] == "female"
+    ]
+    unknown_characters = [
+        c for c in analyzed_characters if character_dict[c]["gender"] == "unknown"
+    ]
+
     # CSV头部
     headers = [
         "name",
@@ -30,7 +40,7 @@ def save_characters_to_files(analyzed_characters, game_name, output_dir):
         "created_at",
         "updated_at",
     ]
-    
+
     # 写入男性角色文件
     with open(male_filename, "w", encoding="utf-8", newline="") as male_file:
         male_writer = csv.writer(male_file)
@@ -45,7 +55,7 @@ def save_characters_to_files(analyzed_characters, game_name, output_dir):
                 character["updated_at"],
             ]
             male_writer.writerow(row_data)
-    
+
     # 写入女性角色文件
     with open(female_filename, "w", encoding="utf-8", newline="") as female_file:
         female_writer = csv.writer(female_file)
@@ -60,7 +70,7 @@ def save_characters_to_files(analyzed_characters, game_name, output_dir):
                 character["updated_at"],
             ]
             female_writer.writerow(row_data)
-    
+
     # 写入未知性别角色文件
     with open(unknown_filename, "w", encoding="utf-8", newline="") as unknown_file:
         unknown_writer = csv.writer(unknown_file)
@@ -123,10 +133,10 @@ def search_and_save_game_characters(game_name, max_pages=3, hide_empty=True):
             for tag in all_character_tags
             if game_name.lower() in tag.get("name", "").lower()
         ]
-        
+
         print("\n正在分析角色性别...")
         analyzed_characters = []
-        
+
         for tag in tqdm(filtered_characters, desc="分析角色性别"):
             name = tag.get("name", "")
             post_count = tag.get("post_count", 0)
@@ -140,14 +150,6 @@ def search_and_save_game_characters(game_name, max_pages=3, hide_empty=True):
                     female_releted_tags_frequency_avg,
                 ) = calculate_gender_frequencies(name)
 
-                # 判断性别
-                if male_releted_tags_frequency_avg > female_releted_tags_frequency_avg:
-                    gender = "male"
-                elif female_releted_tags_frequency_avg > male_releted_tags_frequency_avg:
-                    gender = "female"
-                else:
-                    gender = "unknown"
-
                 # 保存角色数据到内存
                 character_data = {
                     "name": name,
@@ -156,7 +158,6 @@ def search_and_save_game_characters(game_name, max_pages=3, hide_empty=True):
                     "post_count": post_count,
                     "created_at": created_at,
                     "updated_at": updated_at,
-                    "gender": gender
                 }
                 analyzed_characters.append(character_data)
 
@@ -170,23 +171,74 @@ def search_and_save_game_characters(game_name, max_pages=3, hide_empty=True):
                     "post_count": post_count,
                     "created_at": created_at,
                     "updated_at": updated_at,
-                    "gender": "unknown"
+                    "gender": "unknown",
                 }
                 analyzed_characters.append(character_data)
 
-        # 第二阶段：将内存中的数据写入文件
+        # 第二阶段：对角色进行去重
+        print("\n正在去重角色数据...")
+        all_character_name = [name for name in analyzed_characters["name"]]
+
+        character_dict = {}
+        while len(analyzed_characters) > 1:
+            character_data[0] = analyzed_characters.pop(0)  # 获取第一个角色数据
+            character = character_data[0]["name"]  # 获取角色名称
+            character_name = character.split("_(")[0]  # 去除括号及其内容
+
+            for a_character in analyzed_characters:
+                if a_character["name"].split("_(")[0] == character_name:
+                    # 从列表中移除重复的角色
+                    analyzed_characters.remove(a_character)
+                    character_data.append(a_character)
+
+            # 根据count加权计算频率
+            female_frequency = 0
+            male_frequency = 0
+            for data in character_data:
+                female_frequency += data["female_frequency_avg"] * data["post_count"]
+                male_frequency += data["male_frequency_avg"] * data["post_count"]
+            total_count = sum(data["post_count"] for data in character_data)
+            female_frequency = female_frequency / total_count
+            male_frequency = male_frequency / total_count
+            # 根据频率判断性别
+            if abs(female_frequency - male_frequency) < 0.05:
+                gender = "unknown"
+            elif female_frequency > male_frequency:
+                gender = "female"
+            else:
+                gender = "male"
+
+            # 保存去重后的角色数据
+            for data in character_data:
+                character_dict[data["name"]] = {
+                    "name": name,
+                    "male_frequency_avg": male_frequency,
+                    "female_frequency_avg": female_frequency,
+                    "post_count": data["post_count"],
+                    "created_at": data["created_at"],
+                    "updated_at": data["updated_at"],
+                    "gender": gender,
+                }
+
+        # 第三阶段：将内存中的数据写入文件
         print("\n正在保存角色数据到文件...")
-        save_characters_to_files(analyzed_characters, game_name, output_dir)
-        
+        save_characters_to_files(
+            all_character_name, character_dict, game_name, output_dir
+        )
+
         # 统计结果
         male_count = len([c for c in analyzed_characters if c["gender"] == "male"])
         female_count = len([c for c in analyzed_characters if c["gender"] == "female"])
-        unknown_count = len([c for c in analyzed_characters if c["gender"] == "unknown"])
-        
+        unknown_count = len(
+            [c for c in analyzed_characters if c["gender"] == "unknown"]
+        )
+
         male_filename = os.path.join(output_dir, f"{game_name}_male_characters.csv")
         female_filename = os.path.join(output_dir, f"{game_name}_female_characters.csv")
-        unknown_filename = os.path.join(output_dir, f"{game_name}_unknown_gender_characters.csv")
-        
+        unknown_filename = os.path.join(
+            output_dir, f"{game_name}_unknown_gender_characters.csv"
+        )
+
         print(f"\n角色tag保存完成:")
         print(f"男性角色: {male_count} 个，保存在 {male_filename}")
         print(f"女性角色: {female_count} 个，保存在 {female_filename}")
