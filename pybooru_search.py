@@ -1,4 +1,5 @@
-from libs.character_search import save_game_characters_to_file, get_possible_game_names
+from libs.character_search import get_possible_game_names
+from libs.search_and_save_game_characters import search_and_save_game_characters
 
 
 def interactive_cli():
@@ -50,7 +51,9 @@ def interactive_cli():
         hide_empty = show_empty != "y"
 
         print(f"\n开始搜索游戏: {game_name}")
-        save_game_characters_to_file(game_name, max_pages=pages, hide_empty=hide_empty)
+        search_and_save_game_characters(
+            game_name, max_pages=pages, hide_empty=hide_empty
+        )
 
     except ValueError:
         print("错误：请输入有效的数字")
